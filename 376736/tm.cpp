@@ -27,22 +27,27 @@
 
 #include "macros.h"
 #include "TransactionalMemory.h"
+#include "Transaction.h"
 
 /** Create (i.e. allocate + init) a new shared memory region, with one first non-free-able allocated segment of the requested size and alignment.
  * @param size  Size of the first shared segment of memory to allocate (in bytes), must be a positive multiple of the alignment
  * @param align Alignment (in bytes, must be a power of 2) that the shared memory region must support
  * @return Opaque shared memory region handle, 'invalid_shared' on failure
 **/
-shared_t tm_create(size_t unused(size), size_t unused(align)) {
-    // TODO: tm_create(size_t, size_t)
-    return invalid_shared;
+shared_t tm_create(size_t size, size_t align) {
+    try {
+        return new TransactionalMemory(size, align);
+    } catch (...) {
+        return invalid_shared;
+    }
 }
 
 /** Destroy (i.e. clean-up + free) a given shared memory region.
  * @param shared Shared memory region to destroy, with no running transaction
 **/
-void tm_destroy(shared_t unused(shared)) {
+void tm_destroy(shared_t shared) {
     // TODO: tm_destroy(shared_t)
+    auto* tm = (TransactionalMemory*) shared;
 }
 
 /** [thread-safe] Return the start address of the first allocated segment in the shared memory region.
@@ -51,6 +56,8 @@ void tm_destroy(shared_t unused(shared)) {
 **/
 void* tm_start(shared_t unused(shared)) {
     // TODO: tm_start(shared_t)
+    auto* tm = (TransactionalMemory*) shared;
+
     return NULL;
 }
 
@@ -59,8 +66,8 @@ void* tm_start(shared_t unused(shared)) {
  * @return First allocated segment size
 **/
 size_t tm_size(shared_t unused(shared)) {
-    // TODO: tm_size(shared_t)
-    return 0;
+    auto* tm = (TransactionalMemory*) shared;
+    return tm->size;
 }
 
 /** [thread-safe] Return the alignment (in bytes) of the memory accesses on the given shared memory region.
@@ -68,8 +75,8 @@ size_t tm_size(shared_t unused(shared)) {
  * @return Alignment used globally
 **/
 size_t tm_align(shared_t unused(shared)) {
-    // TODO: tm_align(shared_t)
-    return 0;
+    auto* tm = (TransactionalMemory*) shared;
+    return tm->alignment;
 }
 
 /** [thread-safe] Begin a new transaction on the given shared memory region.
@@ -79,7 +86,11 @@ size_t tm_align(shared_t unused(shared)) {
 **/
 tx_t tm_begin(shared_t unused(shared), bool unused(is_ro)) {
     // TODO: tm_begin(shared_t)
-    return invalid_tx;
+    auto* tm = (TransactionalMemory*) shared;
+    while(!tm->freeing_lock.try_lock_shared()) {}
+    auto* tr = new Transaction(tm, is_ro);
+    return (tx_t) tr;
+//    return invalid_tx;
 }
 
 /** [thread-safe] End the given transaction.
@@ -89,6 +100,8 @@ tx_t tm_begin(shared_t unused(shared), bool unused(is_ro)) {
 **/
 bool tm_end(shared_t unused(shared), tx_t unused(tx)) {
     // TODO: tm_end(shared_t, tx_t)
+    auto* tm = (TransactionalMemory*) shared;
+    tm->freeing_lock.unlock_shared();
     return false;
 }
 

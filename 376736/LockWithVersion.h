@@ -6,13 +6,14 @@
 #define CS453_2023_LOCKWITHVERSION_H
 
 
-#include <stdatomic.h>
 #include <atomic>
 
 class LockWithVersion {
-    std::atomic_int lock{};
+    std::atomic_int vlock{};
 public:
     LockWithVersion();
+    bool try_lock();
+    void unlock();
 };
 
 
