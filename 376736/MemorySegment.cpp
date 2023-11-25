@@ -14,6 +14,6 @@ MemorySegment::MemorySegment(size_t size, size_t alignment) {
     this->locks = new LockWithVersion[size / alignment];
 }
 
-LockWithVersion *MemorySegment::get_lock(void *p) const {
+LockWithVersion *MemorySegment::get_vlock(void *p) const {
     return &locks[((char*)p - data) / alignment];
 }

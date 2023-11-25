@@ -24,3 +24,17 @@ void LockWithVersion::unlock() {
         vlock.store(cur_vlock - 1);
     }
 }
+
+int LockWithVersion::get_version() {
+    int cur_vlock = vlock.load();
+    return cur_vlock >> 1;
+}
+
+bool LockWithVersion::get_lock() {
+    int cur_vlock = vlock.load();
+    return (bool) cur_vlock & 1;
+}
+
+void LockWithVersion::set_version(int new_v) {
+    vlock.store((new_v << 1) | ((int) get_lock()));
+}

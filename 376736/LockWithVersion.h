@@ -14,6 +14,9 @@ public:
     LockWithVersion();
     bool try_lock();
     void unlock();
+    int get_version();
+    bool get_lock();
+    void set_version(int new_v);
 };
 
 

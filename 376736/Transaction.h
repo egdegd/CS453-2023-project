@@ -21,13 +21,17 @@ struct ReadData {
 };
 
 class Transaction {
+    ~Transaction();
 public:
     bool is_ro{};
     size_t alignment;
     TransactionalMemory* tm;
-    size_t read_v;
-    size_t write_v;
-    void write_to_local(void const* source, std::size_t size, void* target, uint16_t segment_index);
+    int read_v;
+    int write_v;
+//    TODO: почему uintt16?
+    void write_to_local(void* source, std::size_t size, void* target, uint16_t segment_id);
+    bool rw_read(void* source, std::size_t size, void *target, uint16_t segment_id);
+    bool ro_read(void* source, std::size_t size, void *target, uint16_t segment_id);
     bool end();
     Transaction(TransactionalMemory* tm, bool is_ro);
     std::vector<ReadData> local_read_data{};
@@ -36,6 +40,10 @@ public:
     bool try_lock_write();
 
     void unlock_all_write();
+
+    bool validate_read();
+
+    void make_write();
 };
 
 

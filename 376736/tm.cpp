@@ -65,7 +65,7 @@ void* tm_start(shared_t unused(shared)) {
  * @param shared Shared memory region to query
  * @return First allocated segment size
 **/
-size_t tm_size(shared_t unused(shared)) {
+size_t tm_size(shared_t shared) {
     auto* tm = (TransactionalMemory*) shared;
     return tm->size;
 }
@@ -74,7 +74,7 @@ size_t tm_size(shared_t unused(shared)) {
  * @param shared Shared memory region to query
  * @return Alignment used globally
 **/
-size_t tm_align(shared_t unused(shared)) {
+size_t tm_align(shared_t shared) {
     auto* tm = (TransactionalMemory*) shared;
     return tm->alignment;
 }
@@ -84,7 +84,7 @@ size_t tm_align(shared_t unused(shared)) {
  * @param is_ro  Whether the transaction is read-only
  * @return Opaque transaction ID, 'invalid_tx' on failure
 **/
-tx_t tm_begin(shared_t unused(shared), bool unused(is_ro)) {
+tx_t tm_begin(shared_t shared, bool is_ro) {
     // TODO: tm_begin(shared_t)
     auto* tm = (TransactionalMemory*) shared;
     while(!tm->freeing_lock.try_lock_shared()) {}
@@ -98,11 +98,14 @@ tx_t tm_begin(shared_t unused(shared), bool unused(is_ro)) {
  * @param tx     Transaction to end
  * @return Whether the whole transaction committed
 **/
-bool tm_end(shared_t unused(shared), tx_t unused(tx)) {
+bool tm_end(shared_t shared, tx_t tx) {
     // TODO: tm_end(shared_t, tx_t)
     auto* tm = (TransactionalMemory*) shared;
+    auto* tr = (Transaction*) tx;
+    bool is_committed = tr->end();
     tm->freeing_lock.unlock_shared();
-    return false;
+    delete tr;
+    return is_committed;
 }
 
 /** [thread-safe] Read operation in the given transaction, source in the shared region and target in a private region.

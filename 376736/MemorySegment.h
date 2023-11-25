@@ -16,7 +16,7 @@ public:
     size_t alignment;
     char* data;
     LockWithVersion* locks;
-    LockWithVersion* get_lock(void* p) const;
+    LockWithVersion* get_vlock(void* p) const;
 
     MemorySegment(size_t size, size_t alignment);
 };
