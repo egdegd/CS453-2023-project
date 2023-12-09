@@ -2,8 +2,8 @@
 // Created by grisha on 12.11.23.
 //
 
-#ifndef CS453_2023_LOCKWITHVERSION_H
-#define CS453_2023_LOCKWITHVERSION_H
+#ifndef CS453_2023_LOCKWITHVERSION_HPP
+#define CS453_2023_LOCKWITHVERSION_HPP
 
 
 #include <atomic>
@@ -20,4 +20,4 @@ public:
 };
 
 
-#endif //CS453_2023_LOCKWITHVERSION_H
+#endif //CS453_2023_LOCKWITHVERSION_HPP

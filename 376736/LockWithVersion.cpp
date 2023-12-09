@@ -2,7 +2,7 @@
 // Created by grisha on 12.11.23.
 //
 
-#include "LockWithVersion.h"
+#include "LockWithVersion.hpp"
 
 LockWithVersion::LockWithVersion() {
     vlock.store(0);
@@ -32,7 +32,7 @@ int LockWithVersion::get_version() {
 
 bool LockWithVersion::get_lock() {
     int cur_vlock = vlock.load();
-    return (bool) cur_vlock & 1;
+    return (bool) (cur_vlock & 1);
 }
 
 void LockWithVersion::set_version(int new_v) {

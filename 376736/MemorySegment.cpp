@@ -3,7 +3,7 @@
 //
 
 #include <cstdlib>
-#include "MemorySegment.h"
+#include "MemorySegment.hpp"
 #include "cstring"
 
 MemorySegment::MemorySegment(size_t size, size_t alignment) {
@@ -16,4 +16,10 @@ MemorySegment::MemorySegment(size_t size, size_t alignment) {
 
 LockWithVersion *MemorySegment::get_vlock(void *p) const {
     return &locks[((char*)p - data) / alignment];
+}
+
+void MemorySegment::free() const {
+//    TODO: replace for destructor
+    std::free(data);
+    delete[] locks;
 }

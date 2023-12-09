@@ -2,12 +2,12 @@
 // Created by grisha on 12.11.23.
 //
 
-#ifndef CS453_2023_MEMORYSEGMENT_H
-#define CS453_2023_MEMORYSEGMENT_H
+#ifndef CS453_2023_MEMORYSEGMENT_HPP
+#define CS453_2023_MEMORYSEGMENT_HPP
 
 
 #include <cstring>
-#include "LockWithVersion.h"
+#include "LockWithVersion.hpp"
 
 class MemorySegment {
 
@@ -19,7 +19,8 @@ public:
     LockWithVersion* get_vlock(void* p) const;
 
     MemorySegment(size_t size, size_t alignment);
+    void free() const;
 };
 
 
-#endif //CS453_2023_MEMORYSEGMENT_H
+#endif //CS453_2023_MEMORYSEGMENT_HPP

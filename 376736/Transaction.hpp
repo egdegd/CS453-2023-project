@@ -2,12 +2,12 @@
 // Created by grisha on 19.11.23.
 //
 
-#ifndef CS453_2023_TRANSACTION_H
-#define CS453_2023_TRANSACTION_H
+#ifndef CS453_2023_TRANSACTION_HPP
+#define CS453_2023_TRANSACTION_HPP
 
 
 #include <set>
-#include "TransactionalMemory.h"
+#include "TransactionalMemory.hpp"
 
 struct WriteData {
     void* data;
@@ -21,7 +21,6 @@ struct ReadData {
 };
 
 class Transaction {
-    ~Transaction();
 public:
     bool is_ro{};
     size_t alignment;
@@ -29,8 +28,9 @@ public:
     int read_v;
     int write_v;
 //    TODO: почему uintt16?
-    void write_to_local(void* source, std::size_t size, void* target, uint16_t segment_id);
-    bool rw_read(void* source, std::size_t size, void *target, uint16_t segment_id);
+    void write_to_local(void const* source, std::size_t size, void* target, uint16_t segment_id);
+    bool read(void* source, std::size_t size, void* target, uint16_t segment_index);
+    bool rw_read(void* source, std::size_t size, void* target, uint16_t segment_id);
     bool ro_read(void* source, std::size_t size, void *target, uint16_t segment_id);
     bool end();
     Transaction(TransactionalMemory* tm, bool is_ro);
@@ -44,7 +44,9 @@ public:
     bool validate_read();
 
     void make_write();
+
+    ~Transaction();
 };
 
 
-#endif //CS453_2023_TRANSACTION_H
+#endif //CS453_2023_TRANSACTION_HPP
