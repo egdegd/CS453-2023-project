@@ -114,10 +114,9 @@ bool Transaction::ro_read(void *source, std::size_t size, void *target, uint16_t
         LockWithVersion* versioned_lock = tm->memory_segments[segment_id]->get_vlock(real_source);
         void* real_target = (char*) target + i * alignment;
         memcpy(real_target, real_source, alignment);
-//        if (versioned_lock->get_lock() || versioned_lock->get_version() > read_v) return false;
         int j = 0;
         while((versioned_lock->get_lock() || versioned_lock->get_version() > read_v)) {
-            if (j == 10) return false;
+            if (j >= 50) return false;
             int new_time = tm->global_clock.load();
             if (!validate_read()) return false;
             read_v = new_time;
