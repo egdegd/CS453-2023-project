@@ -18,8 +18,7 @@ LockWithVersion *MemorySegment::get_vlock(void *p) const {
     return &locks[((char*)p - data) / alignment];
 }
 
-void MemorySegment::free() const {
-//    TODO: replace for destructor
+MemorySegment::~MemorySegment() {
     std::free(data);
     delete[] locks;
 }

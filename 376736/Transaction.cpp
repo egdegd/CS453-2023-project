@@ -24,10 +24,7 @@ void Transaction::write_to_local(void const* source, std::size_t size, void *tar
 bool Transaction::try_lock_write() {
     for (WriteData data: local_write_data) {
         LockWithVersion* versioned_lock = tm->memory_segments[data.segment_id]->get_vlock(data.destination);
-//        TODO: Is it necessary?
-        if (locked_segments.find(versioned_lock) != locked_segments.end()) {
-            continue;
-        }
+        if (locked_segments.find(versioned_lock) != locked_segments.end()) continue;
         if(!versioned_lock->try_lock()) {
             unlock_all_write();
             return false;
@@ -49,7 +46,6 @@ void Transaction::unlock_all_write() {
 
 bool Transaction::end() {
     if (is_ro) {
-//        TODO: why?
         return true;
     } else {
         if (!try_lock_write()) {
@@ -71,7 +67,6 @@ bool Transaction::validate_read() {
     }
     for (ReadData rd: local_read_data) {
         LockWithVersion* versioned_lock = tm->memory_segments[rd.segment_id]->get_vlock(rd.data);
-//        TODO: подумать, все ли правильно, так как версия и лок могут быть полуены в разные моменты
         int version = versioned_lock->get_version();
         bool lock = versioned_lock->get_lock();
         if (version > read_v) return false;
@@ -95,7 +90,6 @@ bool Transaction::rw_read(void *source, std::size_t size, void *target, uint16_t
     for(size_t i = 0; i < size / alignment; i++) {
         void* real_source = (char*) source + i * alignment;
         LockWithVersion* versioned_lock = tm->memory_segments[segment_id]->get_vlock(real_source);
-//        TODO: не рано ли делается проверка?
         if (versioned_lock->get_lock() || versioned_lock->get_version() > read_v) return false;
         local_read_data.push_back(ReadData{real_source, segment_id});
         void* real_target = (char*) target + i * alignment;
@@ -120,8 +114,17 @@ bool Transaction::ro_read(void *source, std::size_t size, void *target, uint16_t
         LockWithVersion* versioned_lock = tm->memory_segments[segment_id]->get_vlock(real_source);
         void* real_target = (char*) target + i * alignment;
         memcpy(real_target, real_source, alignment);
-        if (versioned_lock->get_lock() || versioned_lock->get_version() > read_v) return false;
-//        TODO: надо ли добавлять в read_set?
+//        if (versioned_lock->get_lock() || versioned_lock->get_version() > read_v) return false;
+        int j = 0;
+        while((versioned_lock->get_lock() || versioned_lock->get_version() > read_v)) {
+            if (j == 10) return false;
+            int new_time = tm->global_clock.load();
+            if (!validate_read()) return false;
+            read_v = new_time;
+            memcpy(real_target, real_source, alignment);
+            j++;
+        }
+        local_read_data.push_back(ReadData{real_source, segment_id});
     }
     return true;
 }
@@ -131,7 +134,6 @@ Transaction::~Transaction() {
         free(w.data);
     }
     local_read_data.clear();
-//    TODO: тут точно так?
     local_write_data.clear();
     tm->lock_free.unlock_shared();
 }

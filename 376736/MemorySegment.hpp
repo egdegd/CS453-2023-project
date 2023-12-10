@@ -19,7 +19,8 @@ public:
     LockWithVersion* get_vlock(void* p) const;
 
     MemorySegment(size_t size, size_t alignment);
-    void free() const;
+    ~MemorySegment();
+//    void free() const;
 };
 
 
