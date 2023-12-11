@@ -47,14 +47,7 @@ shared_t tm_create(size_t size, size_t align) noexcept {
 **/
 void tm_destroy(shared_t shared) noexcept {
     auto* tm = (TransactionalMemory*) shared;
-    for (size_t i = 0; i < tm->max_n_of_segments; i++) {
-        //    TODO: if (tm->segment_states[i] == 2) ... . Maybe add lock_free.try_lock?
-        if (tm->segment_states[i] == 1) {
-            delete tm->memory_segments[i];
-        }
-    }
-    delete[] tm->memory_segments;
-    delete[] tm->segment_states;
+    delete tm;
 }
 
 /** [thread-safe] Return the start address of the first allocated segment in the shared memory region.

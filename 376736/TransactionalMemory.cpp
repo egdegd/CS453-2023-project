@@ -22,7 +22,16 @@ TransactionalMemory::TransactionalMemory(size_t size, size_t alignment) {
     real_addr = get_first_digits(memory_segments[0]);
 }
 
-TransactionalMemory::~TransactionalMemory() = default;
+TransactionalMemory::~TransactionalMemory() {
+    for (size_t i = 0; i < max_n_of_segments; i++) {
+        //    TODO: if (tm->segment_states[i] == 2) ... . Maybe add lock_free.try_lock?
+        if (segment_states[i] == 1) {
+            delete memory_segments[i];
+        }
+    }
+    delete[] memory_segments;
+    delete[] segment_states;
+}
 
 void *TransactionalMemory::create_temp_pointer(void *p, uint16_t segment_id) {
     return change_first_digits(p, segment_id);

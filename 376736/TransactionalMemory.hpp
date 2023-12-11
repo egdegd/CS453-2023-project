@@ -15,8 +15,6 @@
 class TransactionalMemory {
 
 
-    ~TransactionalMemory();
-
 public:
     TransactionalMemory(size_t size, size_t alignment);
 
@@ -41,6 +39,8 @@ public:
     void *real_data_pointer(const void *pVoid) const;
 
     void add_segments();
+
+    ~TransactionalMemory();
 };
 
 
