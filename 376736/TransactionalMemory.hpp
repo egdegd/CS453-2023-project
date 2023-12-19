@@ -20,7 +20,7 @@ public:
 
     size_t size;
     size_t alignment;
-    size_t max_n_of_segments = 6000;
+    size_t max_n_of_segments = 7000;
     std::atomic_uint16_t real_n_of_segments{};
     std::atomic_int global_clock{0};
     MemorySegment** memory_segments;
@@ -31,8 +31,6 @@ public:
     void free_useless_segments();
     static void *create_temp_pointer(void *p, uint16_t segment_id);
 
-    static void *change_first_digits(void const *pVoid, uint16_t id);
-
     static uint16_t get_first_digits(void const *pSegment);
     uint16_t real_addr;
 
@@ -40,7 +38,7 @@ public:
 
     void add_segments();
 
-    ~TransactionalMemory();
+    ~TransactionalMemory() = default;
 };
 
 

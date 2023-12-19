@@ -22,33 +22,26 @@ TransactionalMemory::TransactionalMemory(size_t size, size_t alignment) {
     real_addr = get_first_digits(memory_segments[0]);
 }
 
-TransactionalMemory::~TransactionalMemory() {
-    for (size_t i = 0; i < max_n_of_segments; i++) {
-        //    TODO: if (tm->segment_states[i] == 2) ... . Maybe add lock_free.try_lock?
-        if (segment_states[i] == 1) {
-            delete memory_segments[i];
-        }
-    }
-    delete[] memory_segments;
-    delete[] segment_states;
-}
+//TransactionalMemory::~TransactionalMemory() {
+//    for (size_t i = 0; i < max_n_of_segments; i++) {
+//        if (segment_states[i] == 1) {
+//            delete memory_segments[i];
+//        }
+//    }
+//    delete[] memory_segments;
+//    delete[] segment_states;
+//}
 
 void *TransactionalMemory::create_temp_pointer(void *p, uint16_t segment_id) {
-    return change_first_digits(p, segment_id);
-}
-
-void *TransactionalMemory::change_first_digits(void const *pVoid, uint16_t id) {
-    unsigned long clear_mask = 0b0000000000000000111111111111111111111111111111111111111111111111;
-    return (void*)(((unsigned long) pVoid & clear_mask) | ((unsigned long)id << 48));
+    return (void*)(((unsigned long) p & 0b0000000000000000111111111111111111111111111111111111111111111111) | ((unsigned long)segment_id << 48));
 }
 
 uint16_t TransactionalMemory::get_first_digits(void const *pSegment) {
-    unsigned long mask = 0b1111111111111111000000000000000000000000000000000000000000000000;
-    return ((unsigned long) pSegment & mask) >> 48;
+    return ((unsigned long) pSegment & 0b1111111111111111000000000000000000000000000000000000000000000000) >> 48;
 }
 
 void *TransactionalMemory::real_data_pointer(void const *pVoid) const {
-    return change_first_digits(pVoid, real_addr);
+    return (void*)(((unsigned long) pVoid & 0b0000000000000000111111111111111111111111111111111111111111111111) | ((unsigned long)real_addr << 48));
 }
 
 void TransactionalMemory::add_segments() {
